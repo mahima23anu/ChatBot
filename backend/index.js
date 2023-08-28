@@ -7,18 +7,18 @@ const path=require("node:path");
 const app=express();
 app.use(bodyParser.json())
 app.use(cors());
-app.use(express.static("public"));
+app.use(express.static("../frontend/build"));
 
 // app.use(bodyParser.urlencoded({extended:true}));
-const staticPath=path.join(__dirname,"..","frontend","public","index.html")
-// console.log(staticPath)
+const staticPath=path.join(__dirname,"..","frontend","build","index.html")
+console.log(staticPath)
 
 app.get("/",(req,res)=>{
     res.sendFile(staticPath);
 });
 
 const openai = new OpenAI({
-    apiKey: "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" 
+    // apiKey: "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"
   });
   
 
@@ -33,7 +33,7 @@ app.post("/", async (req,res)=>{
     try{
         const {chats} = req.body;
     console.log(req.body)
-    console.log("first")
+    // console.log("first")
 
     const result = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",

@@ -1,20 +1,25 @@
 import { useState } from "react";
-import './App.css';
+import './index.css'
 
 function App() {
   const [message,setMessage]=useState("");
   const [chats,setChats]=useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+
   
   const chat =async (e,message)=>{
     e.preventDefault();
 
     if(!message) return;
+    setIsTyping(true);
+    // scrollTo(0, 1e10);
 
-    const msgs=chats;
+    let msgs=chats;
     msgs.push({role:"user",content:message});
+    setChats(msgs);
     setMessage("");
 
-    fetch("http:/localhost:8000/",{
+    fetch("http://localhost:8000/",{
       method:"POST",
       headers: {
         "Content-Type":"application/json",
@@ -27,16 +32,18 @@ function App() {
     .then((data)=>{
       msgs.push(data.output);
       setChats(msgs);
+      setIsTyping(false);
+      // scrollTo(0, 1e10);
     })
     .catch((err)=>{
-      console.log(err);
+      console.error(err);
     });
   };
 
   return (
     <div className="App">
       <h1>ChatBot</h1>
-      <section>
+      {/* <section>
       {chats && chats.length
           ? chats.map((chat, index) => (
               <p key={index} className={chat.role === "user" ? "user_msg" : ""}>
@@ -49,7 +56,27 @@ function App() {
             ))
           : ""}
 
-      </section>
+      </section> */}
+      <section>
+  {chats.map((chat, index) => (
+    <p key={index} className={chat.role === "user" ? "user_msg" : ""}>
+      <span>
+        <b>{chat.role && chat.role.toUpperCase()}</b>
+      </span>
+      <span>:</span>
+      <span>{chat.content}</span>
+    </p>
+  ))}
+  {(!chats || chats.length === 0) && <p>No chats available.</p>}
+</section>
+
+
+      <div className={isTyping ? "" : "hide"}>
+        <p>
+          <i>{isTyping ? "Typing" : ""}</i>
+        </p>
+      </div>
+
       <form action="" onSubmit={(e) => chat(e, message)}>
         <input
           type="text"
