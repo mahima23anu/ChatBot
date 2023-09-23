@@ -1,7 +1,7 @@
-const OpenAI =require('openai');
-const express =require ("express");
-const bodyParser =require ("body-parser");
-const cors =require ("cors");
+const OpenAIApi =require('openai');
+const express =require("express");
+const bodyParser =require("body-parser");
+const cors =require("cors");
 const path=require("node:path");
 
 const app=express();
@@ -17,8 +17,9 @@ app.get("/",(req,res)=>{
     res.sendFile(staticPath);
 });
 
-const openai = new OpenAI({
-    // apiKey: "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"
+const openai = new OpenAIApi({
+    apiKey: "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",
+    
   });
   
 
@@ -34,18 +35,37 @@ app.post("/", async (req,res)=>{
         const {chats} = req.body;
     console.log(req.body)
     // console.log("first")
+    const messages = [
+      { role: 'system', content: 'You are a chatbot. You can assist with various tasks.' },
+      ...chats.map((chat) => ({ role: 'user', content: chat })),
+    ];
+    console.log(messages);
+
+      messages.forEach((message) => {
+        message.content = String(message.content);
+      });
 
     const result = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{"role": "user", "content": "Hello!"},...chats,],
+        // maxTokens:2048,
+        // temperature:0.6,
+        messages: messages,
       });
       console.log(result.choices[0].message);
     
       
     console.log(result)
-    res.json({
-        output: result.data.choices[0].message
-    });
+    if (result && result.choices && result.choices.length > 0) {
+        res.json({
+            output: result.choices[0].message
+        });
+    }
+    else{
+        console.error('No choices found in the API response');
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+    
+  
     }
     catch(error){
         console.error(error);
